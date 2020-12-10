@@ -1,0 +1,6 @@
+
+obj/*.o
+dat/*.csv
+bin/bin
+*.swp
+.vscode/

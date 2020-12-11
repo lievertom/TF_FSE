@@ -5,109 +5,41 @@
 
 #include "esp_log.h"
 #include "esp_wifi.h"
+#include "esp_sleep.h"
 #include "nvs_flash.h"
 #include "esp_event.h"
+#include "esp32/rom/uart.h"
 #include "esp_http_client.h"
 #include "freertos/semphr.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "driver/rtc_io.h"
 
-#include "led.h"
+#include "gpio.h"
 #include "wifi.h"
 #include "data.h"
-#include "http_client.h"
 
 /****************************************************************************/
 /*!                              Macros                                     */
 
-#define IP_TACK_KEY CONFIG_IP_TACK_KEY
-#define OPEN_WEATHER_MAP_KEY CONFIG_OPEN_WEATHER_MAP_KEY
-
-#define REQUEST_DELAY 5*60*1000
+#define SECOND 1000000
 
 /****************************************************************************/
 /*!                        Global Statements                                */
 
 xSemaphoreHandle wifiSemaphoreLED = NULL;
-xSemaphoreHandle wifiSemaphoreHTTP = NULL;
+xSemaphoreHandle wifiSemaphore = NULL;
 
-Field field;
+DeviceData device_data = {0, 0, 0};
 
 /****************************************************************************/
 /*!                         Functions                                       */
-
-/**
-  * @brief Task function to blink led.
-  */
-void BlinkLED(void *params)
-{
-    while (true)
-    {
-        if (xSemaphoreTake(wifiSemaphoreLED, portMAX_DELAY))
-        {
-            led_blink();
-            xSemaphoreGive(wifiSemaphoreLED);
-        }
-    }
-}
-
-/**
-  * @brief Task function used for http request location.
-  */
-void HTTPRequestLocation(void *params)
-{
-    while (true)
-    {
-        if (xSemaphoreTake(wifiSemaphoreHTTP, portMAX_DELAY))
-        {
-            ESP_LOGI("Main Task", "Realiza HTTP Request");
-            led_blink();
-            char url[133];
-            sprintf(url,
-                    "http://api.ipstack.com/check?access_key=%s&fields=latitude,longitude",
-                    IP_TACK_KEY);
-            http_request(url);
-            xSemaphoreGive(wifiSemaphoreHTTP);
-            vTaskDelay(REQUEST_DELAY / portTICK_PERIOD_MS);
-        }
-    }
-}
-
-/**
-  * @brief Task function used for http request weather.
-  */
-void HTTPRequestWeather(void *params)
-{
-    while (true)
-    {
-        if (xSemaphoreTake(wifiSemaphoreHTTP, portMAX_DELAY))
-        {
-            ESP_LOGI("Main Task", "Realiza HTTP Request");
-            led_blink();
-            char url[150];
-            sprintf(url,
-                    "http://api.openweathermap.org/data/2.5/weather?lat=%lf&lon=%lf&units=metric&appid=%s",
-                    field.latitude,
-                    field.longitude,
-                    OPEN_WEATHER_MAP_KEY);
-            http_request(url);
-            print();
-            xSemaphoreGive(wifiSemaphoreHTTP);
-            vTaskDelay(REQUEST_DELAY / portTICK_PERIOD_MS);
-        }
-        
-    }
-}
 
 /**
   * @brief function main.
   */
 void app_main(void)
 {
-    wifiSemaphoreLED = xSemaphoreCreateBinary();
-    xSemaphoreGive(wifiSemaphoreLED);
-
-    led_init();
-    xTaskCreate(&BlinkLED, "Blink", 4096, NULL, 1, NULL);
-
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
     {
@@ -116,9 +48,39 @@ void app_main(void)
     }
     ESP_ERROR_CHECK(ret);
 
-    wifiSemaphoreHTTP = xSemaphoreCreateBinary();
+    wifiSemaphore = xSemaphoreCreateBinary();
     wifi_init();
+    gpio_init();
 
-    xTaskCreate(&HTTPRequestLocation, "HTTP Request Location", 4096, NULL, 1, NULL);
-    xTaskCreate(&HTTPRequestWeather, "HTTP Request Weather", 4096, NULL, 1, NULL);
+    esp_sleep_enable_timer_wakeup(30 * SECOND);
+
+            
+    while(true)
+    {
+        if (!rtc_gpio_get_level(BUTTON))
+        {
+            do
+            {
+                vTaskDelay(pdMS_TO_TICKS(10));
+            } while (!rtc_gpio_get_level(BUTTON));
+        }
+
+        uart_tx_wait_idle(CONFIG_ESP_CONSOLE_UART_NUM);
+
+        esp_light_sleep_start();
+        wifi_start();
+
+        esp_sleep_wakeup_cause_t cause =  esp_sleep_get_wakeup_cause();
+
+        if (cause == ESP_SLEEP_WAKEUP_TIMER)
+        {
+            update_device(&device_data);
+        }
+        else
+        {
+            device_data.device_status = invert_device_status(device_data.device_status);
+        }
+
+        printf ("%d %d %d\n", device_data.device_status, device_data.temperature, device_data.humidity);
+    }
 }

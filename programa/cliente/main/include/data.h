@@ -3,28 +3,17 @@
 
 /****************************************************************************/
 /*!                            Structs                                      */
-typedef struct Field
+typedef struct DeviceData
 {
-    double latitude;
-    double longitude;
-    double temperature;
-    double temp_max;
-    double temp_min;
-    double humidity;
-} Field;
+    int device_status;
+    int temperature;
+    int humidity;
+} DeviceData;
 
 /****************************************************************************/
 /*!                         Functions                                       */
 
-/**
-  * @brief Function to print weather data.
-  */
-void print();
 
-
-/*!
- * @brief This function parse JSON.
- */
-void parser(char * buffer);
 
 #endif /* DATA_H_ */
+

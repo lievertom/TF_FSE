@@ -72,14 +72,9 @@ void app_main(void)
 
         esp_sleep_wakeup_cause_t cause =  esp_sleep_get_wakeup_cause();
 
-        if (cause == ESP_SLEEP_WAKEUP_TIMER)
-        {
-            update_device(&device_data);
-        }
-        else
-        {
+        if (cause == ESP_SLEEP_WAKEUP_GPIO)
             device_data.device_status = invert_device_status(device_data.device_status);
-        }
+        update_device(&device_data);
 
         printf ("%d %d %d\n", device_data.device_status, device_data.temperature, device_data.humidity);
     }

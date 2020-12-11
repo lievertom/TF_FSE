@@ -33,8 +33,11 @@ int invert_device_status(int status)
   */
 void update_device(DeviceData * device_data)
 {
-    device_data->temperature = DHT11_read().temperature;
-    device_data->humidity = DHT11_read().humidity;
+    if (!DHT11_read().status)
+    {
+        device_data->temperature = DHT11_read().temperature;
+        device_data->humidity = DHT11_read().humidity;
+    }
 }
 
 /**

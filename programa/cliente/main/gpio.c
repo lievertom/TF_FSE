@@ -22,10 +22,10 @@
 /**
   * @brief Function to turn on or off. 
   */
-int invert_device_status(int status)
+int set_device_status(int status)
 {
-    gpio_set_level(DEVICE, !status);
-    return !status;
+    gpio_set_level(DEVICE, status);
+    return status;
 }
 
 /**

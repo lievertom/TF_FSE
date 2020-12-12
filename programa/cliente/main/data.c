@@ -2,8 +2,14 @@
 /*                       Header includes                                    */
 
 #include <stdio.h>
+#include <string.h>
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
 #include "cJSON.h"
+
+#include "nvs.h"
+#include "gpio.h"
 
 /****************************************************************************/
 /*! @file data.c
@@ -14,21 +20,13 @@
 /****************************************************************************/
 /*!                        Global Statements                                */
 
-extern Field field;
+extern char room[50];
+extern DeviceData device_data;
+extern xSemaphoreHandle mqttSemaphore;
 
 /****************************************************************************/
 /*!                         Functions                                       */
 
-/*!
- * @brief This function print weather data.
- */
-void print()
-{
-    printf(" Temperatura Atual: %.2lf °C\n", field.temperature);
-    printf("Temperatura Mínima: %.2lf °C\n", field.temp_min);
-    printf("Temperatura Máxima: %.2lf °C\n", field.temp_max);
-    printf("          Humidade: %.2lf %%\n", field.humidity);
-}
 
 /*!
  * @brief This function parse JSON.
@@ -37,19 +35,22 @@ void parser(char * buffer)
 {
     cJSON * json = cJSON_Parse (buffer);
 
-    if (buffer[2] == 'l')
+    if (buffer[2] == 'r' && buffer[3] == 'o' && buffer[4] == 'o' && buffer[5] == 'm')
     {
-        field.latitude = cJSON_GetObjectItemCaseSensitive(json, "latitude")->valuedouble;
-        field.longitude = cJSON_GetObjectItemCaseSensitive(json, "longitude")->valuedouble;
-    }
-    else if (buffer[2] == 'c')
+        if (!strlen(room))
+        {
+            sprintf(room, "%s",cJSON_GetObjectItemCaseSensitive(json, "room")->valuestring);
+            nvs_set_room();
+            xSemaphoreGive(mqttSemaphore);
+        }
+    } 
+    else if (buffer[2] == 'd' && buffer[3] == 'e' && buffer[4] == 'v' && buffer[5] == 'i' && buffer[6] == 'c' && buffer[7] == 'e')
     {
-        cJSON * data = cJSON_GetObjectItem(json, "main");
-        field.temperature = cJSON_GetObjectItemCaseSensitive(data, "temp")->valuedouble;
-        field.temp_min = cJSON_GetObjectItemCaseSensitive(data, "temp_min")->valuedouble;
-        field.temp_max = cJSON_GetObjectItemCaseSensitive(data, "temp_max")->valuedouble;
-        field.humidity = cJSON_GetObjectItemCaseSensitive(data, "humidity")->valuedouble;
+        int device = cJSON_GetObjectItemCaseSensitive(json, "device")->valueint;
+        if (device != device_data.device_status)
+        {
+            device_data.device_status = set_device_status(device);
+        }
     }
-
     cJSON_Delete(json);
 }

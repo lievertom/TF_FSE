@@ -13,7 +13,7 @@ typedef struct DeviceData
 /****************************************************************************/
 /*!                         Functions                                       */
 
-
+void parser(char * buffer);
 
 #endif /* DATA_H_ */
 

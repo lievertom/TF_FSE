@@ -20,7 +20,7 @@
 /**
   * @brief Function to turn on or off. 
   */
-int invert_device_status(int status);
+int set_device_status(int status);
 
 /**
   * @brief Function to update data sensor. 

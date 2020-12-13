@@ -14,45 +14,32 @@
 #define DATE_SIZE               11
 #define HOUR_SIZE               9
 
-#define NLAMP                   4
-#define NOPEN_SENSOR            6
+#define NLAMP                   2
+#define NOPEN_SENSOR            4
 #define NPRESENCE_SENSOR        2
-
-#define AIR_OFF                 0.0f
 
 #define DELAY_ALARM             10
 
 /****************************************************************************/
 /*!                            Structs                                      */
 
-typedef struct Data 
+typedef struct SystemData 
 {
     bool alarm;
     unsigned char lamp;
-    unsigned char air_turn;
     unsigned char open_sensor;
     unsigned char presence_sensor;
     float humidity;
     float temperature;
-    float air_reference_temperature;
-    int server_socket;
     pid_t alarm_pid;
-} Data;
+} SystemData;
 
-typedef struct Send
+typedef struct DeviceData
 {
-    unsigned char lamp;
-    float air_reference_temperature;
-} Send;
-
-typedef struct Receive
-{
-    unsigned char air_turn;
-    unsigned char open_sensor;
-    unsigned char presence_sensor;
-    float humidity;
-    float temperature;
-} Receive;
+    int status;
+    int humididy;
+    int temperature;
+} DeviceData;
 
 /****************************************************************************/
 /*!                         Functions                                       */

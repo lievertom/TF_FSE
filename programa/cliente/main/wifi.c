@@ -142,3 +142,19 @@ void wifi_stop()
     ESP_ERROR_CHECK(esp_event_handler_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler));
     vEventGroupDelete(s_wifi_event_group);
 }
+
+void setMacAddress(char * mac)
+{
+    uint8_t base_mac[6];
+    ESP_ERROR_CHECK(esp_efuse_mac_get_default(base_mac));
+    sprintf(
+        mac,
+        "%02x:%02x:%02x:%02x:%02x:%02x",
+        base_mac[0],
+        base_mac[1],
+        base_mac[2],
+        base_mac[3],
+        base_mac[4],
+        base_mac[5]
+    );
+}

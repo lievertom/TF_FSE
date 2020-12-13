@@ -19,4 +19,6 @@ void wifi_start();
   */
 void wifi_stop();
 
+void setMacAddress(char * mac);
+
 #endif /* WIFI_H_ */

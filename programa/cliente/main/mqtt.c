@@ -21,6 +21,7 @@
 #include "cJSON.h"
 
 #include "data.h"
+#include "wifi.h"
 
 #include "mqtt.h"
 
@@ -36,18 +37,18 @@ esp_mqtt_client_config_t mqtt_config = {
 void mqtt_subscribe ()
 {
     char topic[50];
-    uint8_t mac;
-    ESP_ERROR_CHECK(esp_efuse_mac_get_default(&mac));
+    char mac[18];
+    setMacAddress(mac);
     if (strlen(room))
         xSemaphoreGive(mqttSemaphore);
     else
     {
-        char message[20];
-        sprintf(message, "{\"new_device\":%d}", mac);
+        char message[70];
+        sprintf(message, "{\"new_device\":%s}", mac);
         mqtt_send_message("fse2020/170039251/dispositivos", message);
     }    
-    sprintf(topic, "fse2020/170039251/dispositivos/%d", mac);
-    int msg_id = esp_mqtt_client_subscribe(client, topic, 0);
+    sprintf(topic, "fse2020/170039251/dispositivos/%s", mac);
+    esp_mqtt_client_subscribe(client, topic, 2);
 }
 
 void mqtt_receive_message (esp_mqtt_event_handle_t event)

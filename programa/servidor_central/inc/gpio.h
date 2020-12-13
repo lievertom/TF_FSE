@@ -15,6 +15,9 @@
 #define PRESENCE_SENSOR_1  RPI_V2_GPIO_P1_22 
 #define PRESENCE_SENSOR_2  RPI_V2_GPIO_P1_37
 
+#define ON                 1
+#define OFF                0
+
 /****************************************************************************/
 /*!                             Functions                                   */
 
@@ -56,5 +59,7 @@ void *lamp_control (void *args);
  *
  */
 void *ac_control (void *args);
+
+void turn_on_off(int device, int turn);
 
 #endif /* GPIO_H_ */

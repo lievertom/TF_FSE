@@ -9,6 +9,7 @@
 #include "data.h"
 #include "alarm.h"
 #include "window.h"
+#include "gpio.h"
 
 /******************************************************************************/
 /*! @file control.c
@@ -70,7 +71,9 @@ void sig_handler (int signal)
     if (data.alarm_pid)
         kill(data.alarm_pid, SIGKILL);
     end_window();
-    close(data.server_socket);
+    turn_on_off(LAMP_1, OFF);
+    turn_on_off(LAMP_2, OFF);
+    bcm2835_close();
     printf("exit, log saved to dat/data.csv\n");
     exit(0);
 }

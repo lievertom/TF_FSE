@@ -6,7 +6,6 @@
 #include <signal.h>
 #include <pthread.h>
 
-#include "tcp.h"
 #include "data.h"
 #include "alarm.h"
 #include "window.h"
@@ -25,7 +24,6 @@ pthread_t send_thread;
 pthread_t input_thread;
 pthread_t alarm_thread;
 pthread_t output_thread;
-pthread_t receive_thread;
 
 Data data;
 
@@ -47,7 +45,6 @@ void store_data (char *message)
 void push()
 {
     pthread_join(send_thread, NULL);
-    pthread_create(&send_thread, NULL, submit, (void *) &data);
 }
 
 /*!
@@ -69,7 +66,6 @@ void alarm_handler(int signum)
 void sig_handler (int signal)
 {
     alarm(0);
-    pthread_cancel(receive_thread);
     pthread_join(output_thread, NULL);
     if (data.alarm_pid)
         kill(data.alarm_pid, SIGKILL);
@@ -84,29 +80,13 @@ void sig_handler (int signal)
  */
 void initialize_system()
 {
-    data.lamp = 0;
-    data.alarm = 0;
-    data.air_turn = 0;
-    data.alarm_pid = 0;
-    data.open_sensor = 0;
-    data.presence_sensor = 0;
+    // if (pthread_create(&input_thread, NULL, input_values, (void *) &data))
+    // {
+    //     printf("Fail to create input thread\n");
+    //     exit(1);
+    // }
 
-    initialize_tcp_server(&data);
-    initialize_window();
-    
-    if (pthread_create(&input_thread, NULL, input_values, (void *) &data))
-    {
-        printf("Fail to create input thread\n");
-        exit(1);
-    }
+    // alarm(1);
 
-    if(pthread_create(&receive_thread, NULL, receive, (void *) &data))
-    {
-        printf("Fail to create receive_thread\n");
-        exit(2);
-    }
-
-    alarm(1);
-
-    pthread_join(input_thread, NULL);
+    // pthread_join(input_thread, NULL);
 }

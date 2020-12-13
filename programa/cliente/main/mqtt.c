@@ -54,12 +54,11 @@ void mqtt_receive_message (esp_mqtt_event_handle_t event)
 {
     printf("%.*s\r\n", event->data_len, event->data);
     parser(event->data);
-    
 }
 
 void mqtt_send_message (char * topic, char * message)
 {
-    int id_msg = esp_mqtt_client_publish(client, topic, message, 0, 1, 0);
+    int id_msg = esp_mqtt_client_publish(client, topic, message, 0, 2, 0);
     ESP_LOGI(TAG, "Mesnagem enviada, ID: %d", id_msg);
 }
 
@@ -70,10 +69,7 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
     switch (event->event_id) {
         case MQTT_EVENT_CONNECTED:
             ESP_LOGI(TAG, "MQTT_EVENT_CONNECTED");
-            if(!strlen(room))
-                mqtt_subscribe();
-            else
-                xSemaphoreGive(mqttSemaphore);
+            mqtt_subscribe();
             break;
         case MQTT_EVENT_DISCONNECTED:
             ESP_LOGI(TAG, "MQTT_EVENT_DISCONNECTED");

@@ -10,6 +10,7 @@
 
 #include "nvs.h"
 #include "gpio.h"
+#include "mqtt.h"
 
 /****************************************************************************/
 /*! @file data.c
@@ -49,8 +50,37 @@ void parser(char * buffer)
         int device = cJSON_GetObjectItemCaseSensitive(json, "device")->valueint;
         if (device != device_data.device_status)
         {
-            device_data.device_status = set_device_status(device);
+            set_device_status(device);
         }
     }
     cJSON_Delete(json);
+}
+
+void sendSensorData(void *params)
+{
+    char message[50];
+    char topic[100];
+    if (xSemaphoreTake(mqttSemaphore, portMAX_DELAY))
+    {
+        while (true)
+        {
+            update_device(&device_data);
+            sprintf(message, "{\"temperature\":%d}", device_data.temperature);
+            sprintf(topic, "fse2020/170039251/dispositivos/%s/temperatura", room);
+            mqtt_send_message(topic, message);
+            sprintf(topic, "fse2020/170039251/dispositivos/%s/umidade", room);
+            sprintf(message, "{\"humidity\":%d}", device_data.humidity);
+            mqtt_send_message(topic, message);
+            vTaskDelay(30000 / portTICK_PERIOD_MS);
+        }
+    }
+}
+
+void sendDeviceStatus(void)
+{
+    char message[50];
+    char topic[100];
+    sprintf(message, "{\"status\":%d}", device_data.device_status);
+    sprintf(topic, "fse2020/170039251/dispositivos/%s/estado", room);
+    mqtt_send_message(topic, message);
 }

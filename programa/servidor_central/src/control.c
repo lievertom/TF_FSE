@@ -26,7 +26,7 @@ pthread_t input_thread;
 pthread_t alarm_thread;
 pthread_t output_thread;
 
-Data data;
+SystemData system_data = {0};
 
 /****************************************************************************/
 /*!                         Functions                                       */
@@ -55,10 +55,10 @@ void alarm_handler(int signum)
 {   
     alarm(1);
     pthread_join(output_thread, NULL);
-    if (!data.alarm)
-        pthread_create(&alarm_thread, NULL, play_alarm, (void *) &data);        
+    if (!system_data.alarm)
+        pthread_create(&alarm_thread, NULL, play_alarm, (void *) &system_data);        
 
-    pthread_create(&output_thread, NULL, output_values, (void *) &data);        
+    pthread_create(&output_thread, NULL, output_values, (void *) &system_data);        
 }
 
 /*!
@@ -68,12 +68,12 @@ void sig_handler (int signal)
 {
     alarm(0);
     pthread_join(output_thread, NULL);
-    if (data.alarm_pid)
-        kill(data.alarm_pid, SIGKILL);
+    if (system_data.alarm_pid)
+        kill(system_data.alarm_pid, SIGKILL);
     end_window();
-    turn_on_off(LAMP_1, OFF);
-    turn_on_off(LAMP_2, OFF);
-    bcm2835_close();
+    // turn_on_off(LAMP_1, OFF);
+    // turn_on_off(LAMP_2, OFF);
+    // bcm2835_close();
     printf("exit, log saved to dat/data.csv\n");
     exit(0);
 }
@@ -83,13 +83,15 @@ void sig_handler (int signal)
  */
 void initialize_system()
 {
-    // if (pthread_create(&input_thread, NULL, input_values, (void *) &data))
-    // {
-    //     printf("Fail to create input thread\n");
-    //     exit(1);
-    // }
+    initialize_window ();
+    
+    if (pthread_create(&input_thread, NULL, input_values, (void *) &system_data))
+    {
+        printf("Fail to create input thread\n");
+        exit(1);
+    }
 
-    // alarm(1);
+    alarm(1);
 
-    // pthread_join(input_thread, NULL);
+    pthread_join(input_thread, NULL);
 }

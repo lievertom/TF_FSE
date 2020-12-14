@@ -37,8 +37,10 @@ typedef struct SystemData
 typedef struct DeviceData
 {
     int status;
-    int humididy;
+    int humidity;
     int temperature;
+    char * room;
+    char mac[18];
 } DeviceData;
 
 /****************************************************************************/

@@ -21,7 +21,9 @@
 #define FIRST_LINE_COMMANDS     2
 #define FIRST_LINE_INSTRUCTIONS 15
 
-#define BUTTON_SIZE             12
+#define MAX_DEVICE              5
+
+#define BUTTON_SIZE             17
 
 /****************************************************************************/
 /*!                            Structs                                      */

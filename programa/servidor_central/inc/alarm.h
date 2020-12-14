@@ -18,7 +18,7 @@
  *  @return void
  *
  */
-unsigned char alarm_control(Data *data);
+unsigned char alarm_control(SystemData *system_data);
 
 /*!
  *  @brief Thread function that play the alarm.

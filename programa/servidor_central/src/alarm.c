@@ -18,14 +18,14 @@
 /*!
  * @brief Function to control the alarm.
  */
-unsigned char alarm_control(Data *data)
+unsigned char alarm_control(SystemData *system_data)
 {
     for (int i = 0; i < NOPEN_SENSOR; i++)
-        if (data->open_sensor&1<<i)
+        if (system_data->open_sensor&1<<i)
             return 1;
 
     for (int i = 0; i < NPRESENCE_SENSOR; i++)
-        if (data->presence_sensor&1<<i)
+        if (system_data->presence_sensor&1<<i)
             return 1;
 
     return 0;
@@ -36,12 +36,12 @@ unsigned char alarm_control(Data *data)
  */
 void *play_alarm(void *args)
 {
-    Data *data = (Data *) args;
+    SystemData *system_data = (SystemData *) args;
 
-    if(data->alarm && alarm_control(data) && !data->alarm_pid)
+    if(system_data->alarm && alarm_control(system_data) && !system_data->alarm_pid)
     {
-        data->alarm_pid = fork();
-        if (!data->alarm_pid)
+        system_data->alarm_pid = fork();
+        if (!system_data->alarm_pid)
         {
             char *arguments[] = {
                 COMMAND,
@@ -56,8 +56,8 @@ void *play_alarm(void *args)
                 pid_t child = fork();
                 if (!child)
                     execvp(COMMAND, arguments);
-                else
-                    wait(child);                
+                // else
+                //     wait(child);                
             }
         }
     }

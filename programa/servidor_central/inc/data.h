@@ -18,6 +18,8 @@
 #define NOPEN_SENSOR            4
 #define NPRESENCE_SENSOR        2
 
+#define MAX_DEVICE              5
+
 #define DELAY_ALARM             10
 
 /****************************************************************************/
@@ -55,5 +57,9 @@ typedef struct DeviceData
  *
  */
 void *save_data (void *args);
+
+void parser(char * buffer);
+
+int parser_device_data(char * buffer, int  pointer);
 
 #endif /* DATA_H_ */

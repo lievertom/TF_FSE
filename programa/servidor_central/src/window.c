@@ -11,6 +11,7 @@
 #include "data.h"
 #include "alarm.h"
 #include "control.h"
+#include "mqtt.h"
 
 /******************************************************************************/
 /*! @file window.c
@@ -25,8 +26,9 @@ Windows windows;
 WINDOW *menu_bar;
 
 DeviceData device_data[MAX_DEVICE] = {0};
-
 int num_device = 0;
+
+extern char * payload;
 
 const char *key_function[] =
 {
@@ -157,7 +159,7 @@ bool switch_device(unsigned char key, DeviceData *device_data)
     
     switch_draw(device_data->status, key);
 
-    return device_data;
+    return device_data->status;
 }
 
 /*!
@@ -359,18 +361,21 @@ void *input_values (void *args)
     WINDOW **room_items;
     int key;
     bool auxiliary;
+    char buffer[60];
+    char msg[60];
+    char topic[100];
     while (1)
     {
         key = getch();
         werase(windows.message);
         wrefresh(windows.message);
-        char buffer[60];
         switch (key)
         {
         case KEY_F(10):
-            if (num_device < MAX_DEVICE)
+            if (num_device < MAX_DEVICE && payload)
             {
-                // sprintf(device_data[1].mac, "oi");
+                alarm(0);
+                sprintf(device_data[num_device].mac, "%s", payload);
                 num_device++;
                 room_items = create_items();
                 int item = scrollmenu(room_items);
@@ -382,6 +387,12 @@ void *input_values (void *args)
                 touchwin(stdscr);
                 refresh();
                 store_data(buffer);
+                subscribe(device_data[num_device-1].room);
+                sprintf(topic,"%s/%s", MQTT_BASE_TOPIC, payload);
+                sprintf(msg,"{\"room\":\"%s\"}", device_data[num_device-1].room);
+                publish(topic, msg);
+                payload = NULL;
+                alarm(1);
             }
             break;
         case KEY_F(2):
@@ -485,7 +496,7 @@ void *output_values (void *args)
 
     move(line,BUTTON_SIZE*5);
     move(++line,BUTTON_SIZE*5);
-    printw("Temperature: %.2f oC  ", system_data->temperature);
+    printw("Temperature: %.2f oC  ", system_data->temperature++);
     move(++line,BUTTON_SIZE*5);
     printw("Humidity: %.2f %%  ", system_data->humidity);
 
@@ -510,9 +521,9 @@ void *output_values (void *args)
     move(++line,BUTTON_SIZE*5+2);
     printw("Door: %s  ", message[2+(system_data->open_sensor&1 ? 0 : 1)]);
     
-    for (size_t i = 0; i < MAX_DEVICE; i++)
+    for (size_t i = 0; i < num_device; i++)
     {
-        if(strlen(device_data[i].mac))
+        // if(strlen(device_data[i].mac))
         {
             line += 2;
             move(line,BUTTON_SIZE*5);

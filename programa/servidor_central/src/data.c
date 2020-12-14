@@ -5,14 +5,81 @@
 #include <stdio.h>
 #include <time.h>
 
+#include "cJSON.h"
+#include "regex.h"
+
 /******************************************************************************/
 /*! @file data.c
  * @brief Data structure to save the data
  */
-#include <data.h>
+#include "data.h"
+
+/****************************************************************************/
+/*!                              Macros                                     */
+
+#define REGEX_NEW_DEVICE "^{\"new_device\":\"\\(\\w\\w:\\)\\{5\\}\\w\\w\"}$"
+
+const char * REGEX_DEVICE_DATA[] =
+{
+    "^{\"temperature\":\\w\\+}$",
+    "^{\"humidity\":\\w\\+}$",
+    "^{\"status\":\\w\\+}$",
+};
+
+const char * DEVICE_DATA[] =
+{
+    "temperature",
+    "humidity",
+    "status"
+};
 
 /****************************************************************************/
 /*!                         Functions                                       */
+
+
+/*!
+ * @brief This function parse JSON.
+ */
+void parser(char * buffer)
+{
+    cJSON * json = cJSON_Parse (buffer);
+    regex_t regex;
+
+    if(!regcomp(&regex, REGEX_NEW_DEVICE, 0))
+    {
+        if (!regexec(&regex, buffer, 0, NULL, 0))
+        {
+            sprintf(buffer, "%s",cJSON_GetObjectItemCaseSensitive(json, "new_device")->valuestring);
+        }
+    } 
+
+    regfree(&regex);
+    cJSON_Delete(json);
+}
+
+
+/*!
+ * @brief This function parse JSON.
+ */
+int parser_device_data(char * buffer, int  pointer)
+{
+    cJSON * json = cJSON_Parse (buffer);
+    regex_t regex;
+    int value = -1;
+
+    if(!regcomp(&regex, REGEX_DEVICE_DATA[pointer], 0))
+    {
+        if (!regexec(&regex, buffer, 0, NULL, 0))
+        {
+            value = cJSON_GetObjectItemCaseSensitive(json, DEVICE_DATA[pointer])->valueint;
+        }
+    }
+
+    regfree(&regex);
+    cJSON_Delete(json);
+    
+    return value;
+}
 
 /*!
  * @brief This function get date and hour of system.

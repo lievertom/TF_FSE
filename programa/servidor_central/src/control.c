@@ -5,11 +5,13 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <pthread.h>
+#include <semaphore.h>
 
 #include "data.h"
 #include "alarm.h"
 #include "window.h"
 #include "gpio.h"
+#include "mqtt.h"
 
 /******************************************************************************/
 /*! @file control.c
@@ -84,7 +86,9 @@ void sig_handler (int signal)
 void initialize_system()
 {
     initialize_window ();
+    initialize_mqtt ();
     
+
     if (pthread_create(&input_thread, NULL, input_values, (void *) &system_data))
     {
         printf("Fail to create input thread\n");

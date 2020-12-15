@@ -26,6 +26,8 @@ pthread_t log_thread;
 pthread_t input_thread;
 pthread_t alarm_thread;
 pthread_t output_thread;
+pthread_t sensor_thread;
+pthread_t sensor_alarm_thread;
 
 SystemData system_data = {0};
 
@@ -48,10 +50,14 @@ void alarm_handler(int signum)
 {   
     alarm(1);
     pthread_join(output_thread, NULL);
+    pthread_join(sensor_thread, NULL);
+    pthread_join(sensor_alarm_thread, NULL);
     if (!system_data.alarm)
         pthread_create(&alarm_thread, NULL, play_alarm, (void *) &system_data);        
 
     pthread_create(&output_thread, NULL, output_values, (void *) &system_data);        
+    pthread_create(&sensor_alarm_thread, NULL, sensor_control, (void *) &system_data);        
+    pthread_create(&sensor_thread, NULL, update_device_data, (void *) &system_data);        
 }
 
 /*!
@@ -64,9 +70,9 @@ void sig_handler (int signal)
     if (system_data.alarm_pid)
         kill(system_data.alarm_pid, SIGKILL);
     end_window();
-    // turn_on_off(LAMP_1, OFF);
-    // turn_on_off(LAMP_2, OFF);
-    // bcm2835_close();
+    turn_on_off(LAMP_1, OFF);
+    turn_on_off(LAMP_2, OFF);
+    bcm2835_close();
     printf("exit, log saved to dat/data.csv\n");
     exit(0);
 }
@@ -76,6 +82,7 @@ void sig_handler (int signal)
  */
 void initialize_system()
 {
+    initialize_sensor ();
     initialize_window ();
     initialize_mqtt ();
     

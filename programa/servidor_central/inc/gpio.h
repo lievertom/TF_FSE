@@ -4,16 +4,16 @@
 /****************************************************************************/
 /*!                              Macros                                     */
  
-// #define LAMP_1             RPI_V2_GPIO_P1_11 
-// #define LAMP_2             RPI_V2_GPIO_P1_12
+#define LAMP_1             RPI_V2_GPIO_P1_11 
+#define LAMP_2             RPI_V2_GPIO_P1_12
  
-// #define OPEN_SENSOR_1      RPI_V2_GPIO_P1_29 
-// #define OPEN_SENSOR_2      RPI_V2_GPIO_P1_31 
-// #define OPEN_SENSOR_3      RPI_V2_GPIO_P1_32 
-// #define OPEN_SENSOR_4      RPI_V2_GPIO_P1_36 
+#define OPEN_SENSOR_1      RPI_V2_GPIO_P1_29 
+#define OPEN_SENSOR_2      RPI_V2_GPIO_P1_31 
+#define OPEN_SENSOR_3      RPI_V2_GPIO_P1_32 
+#define OPEN_SENSOR_4      RPI_V2_GPIO_P1_36 
 
-// #define PRESENCE_SENSOR_1  RPI_V2_GPIO_P1_22 
-// #define PRESENCE_SENSOR_2  RPI_V2_GPIO_P1_37
+#define PRESENCE_SENSOR_1  RPI_V2_GPIO_P1_22 
+#define PRESENCE_SENSOR_2  RPI_V2_GPIO_P1_37
 
 #define ON                 1
 #define OFF                0

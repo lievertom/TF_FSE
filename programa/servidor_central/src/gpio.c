@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <sched.h>
 #include <stdlib.h>
-// #include <bcm2835.h>
+#include <bcm2835.h>
 #include <sys/mman.h>
 
 #include "data.h"

@@ -12,6 +12,7 @@
 #include "window.h"
 #include "gpio.h"
 #include "mqtt.h"
+#include "sensor.h"
 
 /******************************************************************************/
 /*! @file control.c
@@ -57,7 +58,7 @@ void alarm_handler(int signum)
 
     pthread_create(&output_thread, NULL, output_values, (void *) &system_data);        
     pthread_create(&sensor_alarm_thread, NULL, sensor_control, (void *) &system_data);        
-    pthread_create(&sensor_thread, NULL, update_device_data, (void *) &system_data);        
+    pthread_create(&sensor_thread, NULL, update_data_sensor, (void *) &system_data);        
 }
 
 /*!

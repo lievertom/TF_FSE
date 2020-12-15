@@ -1,5 +1,5 @@
 CC = gcc
-LDFLAGS = -lncurses -lpthread -lpaho-mqtt3c
+LDFLAGS = -lncurses -lpthread -lpaho-mqtt3c -lbcm2835
 BLDDIR = .
 INCDIR = $(BLDDIR)/inc
 SRCDIR = $(BLDDIR)/src

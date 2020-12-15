@@ -60,6 +60,10 @@ void *save_data (void *args);
 
 bool parser(char * buffer);
 
-int parser_device_data(char * buffer, int  pointer);
+int parser_device_data(char * buffer, char * field);
+
+int get_id (char * buffer);
+
+void update_device_data(int id, char * field, int value);
 
 #endif /* DATA_H_ */

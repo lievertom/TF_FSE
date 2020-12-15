@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "data.h"
-
 /******************************************************************************/
 /*! @file alarm.c
  * @brief Interface for tcp server

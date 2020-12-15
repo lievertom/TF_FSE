@@ -4,9 +4,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <string.h>
 
 #include "cJSON.h"
 #include "regex.h"
+#include "window.h"
 
 /******************************************************************************/
 /*! @file data.c
@@ -15,23 +17,9 @@
 #include "data.h"
 
 /****************************************************************************/
-/*!                              Macros                                     */
+/*!                         global statement                                */
 
-#define REGEX_NEW_DEVICE "^{\"new_device\":\"\\(\\w\\w:\\)\\{5\\}\\w\\w\"}$"
-
-const char * REGEX_DEVICE_DATA[] =
-{
-    "^{\"temperature\":\\w\\+}$",
-    "^{\"humidity\":\\w\\+}$",
-    "^{\"status\":\\w\\+}$",
-};
-
-const char * DEVICE_DATA[] =
-{
-    "temperature",
-    "humidity",
-    "status"
-};
+extern DeviceData device_data[MAX_DEVICE];
 
 /****************************************************************************/
 /*!                         Functions                                       */
@@ -43,45 +31,61 @@ const char * DEVICE_DATA[] =
 bool parser(char * buffer)
 {
     cJSON * json = cJSON_Parse (buffer);
-    regex_t regex;
     bool aux = false;
 
-    if(!regcomp(&regex, REGEX_NEW_DEVICE, 0))
+    cJSON * mac = cJSON_GetObjectItemCaseSensitive(json, "new_device");
+    if (mac)
     {
-        if (!regexec(&regex, buffer, 0, NULL, 0))
-        {
-            sprintf(buffer, "%s",cJSON_GetObjectItemCaseSensitive(json, "new_device")->valuestring);
-            aux = true;
-        }
-    } 
+        sprintf(buffer, "%s", mac->valuestring);
+        aux = true;
+    }
 
-    regfree(&regex);
     cJSON_Delete(json);
     return aux;
 }
 
+int get_id (char * buffer)
+{
+    cJSON * json = cJSON_Parse (buffer);
+    int id = -1;
+
+    cJSON * id_json = cJSON_GetObjectItemCaseSensitive(json, "id");
+    if (id_json)
+    {
+        id = id_json->valueint;
+    }
+
+    cJSON_Delete(json);
+    return id;
+}
 
 /*!
  * @brief This function parse JSON.
  */
-int parser_device_data(char * buffer, int  pointer)
+int parser_device_data(char * buffer, char * field)
 {
     cJSON * json = cJSON_Parse (buffer);
-    regex_t regex;
     int value = -1;
 
-    if(!regcomp(&regex, REGEX_DEVICE_DATA[pointer], 0))
+    cJSON * value_json = cJSON_GetObjectItemCaseSensitive(json, field);
+    if (value_json)
     {
-        if (!regexec(&regex, buffer, 0, NULL, 0))
-        {
-            value = cJSON_GetObjectItemCaseSensitive(json, DEVICE_DATA[pointer])->valueint;
-        }
+        value = value_json->valueint;
     }
 
-    regfree(&regex);
     cJSON_Delete(json);
-    
     return value;
+}
+
+void update_device_data(int id, char * field, int value)
+{
+    if (!strcmp(field,"temperature"))
+        device_data[id].temperature = value;
+    else if (!strcmp(field,"humidity"))
+        device_data[id].humidity = value;
+    else if (!strcmp(field,"status"))
+        if(device_data[id].status != value)
+            switch_device((unsigned char)(id+3), id);
 }
 
 /*!

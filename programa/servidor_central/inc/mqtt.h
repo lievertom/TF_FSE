@@ -10,8 +10,8 @@
 
 #define MQTT_ADDRESS "tcp://test.mosquitto.org"
 #define CLIENT_ID "SERVER"
-#define MQTT_BASE_TOPIC "fse2020/170039251/dispositivos"
-#define MQTT_BASE_ROOM_TOPIC "fse2020/170039251/"
+#define MQTT_BASE_TOPIC "fse2020/170039251/devices"
+#define MQTT_BASE_ROOM_TOPIC "fse2020/170039251"
 
 /****************************************************************************/
 /*!                            Structs                                      */

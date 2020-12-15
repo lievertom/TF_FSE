@@ -5,6 +5,8 @@
 /*                       Header includes                                      */
 #include <curses.h>
 
+#include "data.h"
+
 /****************************************************************************/
 /*!                              Macros                                     */
 
@@ -71,5 +73,7 @@ void *input_values (void *args);
 void end_window();
 
 void add_device ();
+
+bool switch_device(unsigned char key, int id);
 
 #endif /* WINDOW_H_ */

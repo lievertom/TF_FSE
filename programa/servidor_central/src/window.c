@@ -9,7 +9,6 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-#include "data.h"
 #include "alarm.h"
 #include "control.h"
 #include "mqtt.h"
@@ -148,6 +147,8 @@ void switch_draw(bool turn, unsigned char key)
         waddstr(menu_bar, key_function[key]);
         wattroff(menu_bar,COLOR_PAIR(3));
     }
+    touchwin(stdscr);
+    refresh();
 }
 
 /*!
@@ -168,13 +169,13 @@ bool switch_button(unsigned char key, SystemData *system_data)
 /*!
  * @brief Function used to switch the devices.
  */ 
-bool switch_device(unsigned char key, DeviceData *device_data)
+bool switch_device(unsigned char key, int id)
 {    
-    device_data->status = !device_data->status;
+    device_data[id].status = !device_data[id].status;
     
-    switch_draw(device_data->status, key);
+    switch_draw(device_data[id].status, key);
 
-    return device_data->status;
+    return device_data[id].status;
 }
 
 /*!
@@ -374,7 +375,6 @@ void add_device ()
     WINDOW **room_items;
     char topic[100];
     char msg[60];
-
     alarm(0);
     sprintf(device_data[num_device].mac, "%s", mac_address);
     num_device++;
@@ -385,7 +385,7 @@ void add_device ()
     create_button_device(item);
     subscribe(device_data[num_device-1].room);
     sprintf(topic,"%s/%s", MQTT_BASE_TOPIC, mac_address);
-    sprintf(msg,"{\"room\":\"%s\"}", device_data[num_device-1].room);
+    sprintf(msg,"{\"id\":%d, \"room\":\"%s\"}", num_device-1, device_data[num_device-1].room);
     publish(topic, msg);
     mac_address = NULL;
     alarm(1);
@@ -400,7 +400,7 @@ void *input_values (void *args)
     int key;
     bool auxiliary;
     char buffer[60];
-    
+
     while (1)
     {
         key = getch();
@@ -440,7 +440,7 @@ void *input_values (void *args)
         case KEY_F(5):
             if (strlen(device_data[0].mac))
             {
-                auxiliary = switch_device((unsigned char)3, &device_data[0]);
+                auxiliary = switch_device((unsigned char)3, 0);
                 sprintf(buffer, "%s device %s", device_data[0].room, message[auxiliary ? 0 : 1]);
                 push(); 
             }
@@ -448,7 +448,7 @@ void *input_values (void *args)
         case KEY_F(6):
             if (strlen(device_data[1].mac))
             {
-                auxiliary = switch_device((unsigned char)4, &device_data[1]);
+                auxiliary = switch_device((unsigned char)4, 1);
                 sprintf(buffer, "%s device %s", device_data[1].room, message[auxiliary ? 0 : 1]);
                 push(); 
             }
@@ -456,7 +456,7 @@ void *input_values (void *args)
         case KEY_F(7):
             if (strlen(device_data[2].mac))
             {
-                auxiliary = switch_device((unsigned char)5, &device_data[2]);
+                auxiliary = switch_device((unsigned char)5, 2);
                 sprintf(buffer, "%s device %s", device_data[2].room, message[auxiliary ? 0 : 1]);
                 push(); 
             }
@@ -464,7 +464,7 @@ void *input_values (void *args)
         case KEY_F(8):
             if (strlen(device_data[3].mac))
             {
-                auxiliary = switch_device((unsigned char)6, &device_data[3]);
+                auxiliary = switch_device((unsigned char)6, 3);
                 sprintf(buffer, "%s device %s", device_data[3].room, message[auxiliary ? 0 : 1]);
                 push(); 
             }
@@ -472,7 +472,7 @@ void *input_values (void *args)
         case KEY_F(9):
             if (strlen(device_data[4].mac))
             {
-                auxiliary = switch_device((unsigned char)7, &device_data[4]);
+                auxiliary = switch_device((unsigned char)7, 4);
                 sprintf(buffer, "%s device %s", device_data[4].room, message[auxiliary ? 0 : 1]);
                 push(); 
             }
@@ -538,6 +538,8 @@ void *output_values (void *args)
         printw("Temperature: %d.00 oC  ", device_data[i].temperature);
         move(++line,BUTTON_SIZE*5+2);
         printw("Humidity: %d.00 %%  ", device_data[i].humidity);
+        move(++line,BUTTON_SIZE*5+2);
+        printw("status: %d ", device_data[i].status);
     }
     
     refresh();

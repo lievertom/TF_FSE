@@ -8,6 +8,7 @@
 
 #include "control.h"
 #include "window.h"
+#include "regex.h"
 #include "data.h"
 
 /******************************************************************************/
@@ -19,7 +20,9 @@
 /****************************************************************************/
 /*!                              Macros                                     */
 
-#define REGEX_NEW_DEVICE "^{\"new_device\":\"\\w\\+\"}$"
+#define REGEX_TOPIC_TEMPERATURE "^fse2020/170039251/\\w\\+/temperature$"
+#define REGEX_TOPIC_HUMIDITY "^fse2020/170039251/\\w\\+/humidity$"
+#define REGEX_TOPIC_STATUS "^fse2020/170039251/\\w\\+/status$"
 
 /****************************************************************************/
 /*!                         global statement                                */
@@ -44,20 +47,62 @@ void publish(char* topic, char* pay_load)
     MQTTClient_waitForCompletion(client, token, 1000L);
 }
 
-int on_message(void *context, char *topicName, int topicLen, MQTTClient_message *message)
+void parser_topic(char * topic)
+{
+    regex_t regex;
+
+    if(!regcomp(&regex, REGEX_TOPIC_TEMPERATURE, 0))
+    {
+        if (!regexec(&regex, topic, 0, NULL, 0))
+        {
+            sprintf(topic, "temperature");
+            return;
+        }
+    }
+    if(!regcomp(&regex, REGEX_TOPIC_HUMIDITY, 0))
+    {
+        if (!regexec(&regex, topic, 0, NULL, 0))
+        {
+            sprintf(topic, "humidity");
+            return;
+        }
+    }
+    if(!regcomp(&regex, REGEX_TOPIC_STATUS, 0))
+    {
+        if (!regexec(&regex, topic, 0, NULL, 0))
+        {
+            sprintf(topic, "status");
+            return;
+        }
+    }
+}
+
+int on_message(void *context, char *topic, int topicLen, MQTTClient_message *message)
 {
     char * payload = message->payload;
 
-    if(!strcmp(topicName, MQTT_BASE_TOPIC))
+    if(!strcmp(topic, MQTT_BASE_TOPIC))
     {
         if (parser(payload))
         {
             mac_address = payload;
         }
     }
+    else
+    {
+        int id, value;
+        id = get_id(payload);
+        if (id > -1)
+        {
+            parser_topic(topic);
+            value = parser_device_data(payload, topic);
+            if (value > -1)
+                update_device_data(id, topic, value);
+        }
+    }
 
     MQTTClient_freeMessage(&message);
-    MQTTClient_free(topicName);
+    MQTTClient_free(topic);
     return 1;
 }
 
@@ -65,13 +110,13 @@ void subscribe(char * room)
 {
     char topic[60];
     
-    sprintf(topic, "%s/%s/temperatura",MQTT_BASE_ROOM_TOPIC,room);
+    sprintf(topic, "%s/%s/temperature",MQTT_BASE_ROOM_TOPIC,room);
     MQTTClient_subscribe(client, topic, 2);
     
-    sprintf(topic, "%s/%s/umidade",MQTT_BASE_ROOM_TOPIC,room);
+    sprintf(topic, "%s/%s/humidity",MQTT_BASE_ROOM_TOPIC,room);
     MQTTClient_subscribe(client, topic, 2);
     
-    sprintf(topic, "%s/%s/estado",MQTT_BASE_ROOM_TOPIC,room);
+    sprintf(topic, "%s/%s/status",MQTT_BASE_ROOM_TOPIC,room);
     MQTTClient_subscribe(client, topic, 2);
 }
 

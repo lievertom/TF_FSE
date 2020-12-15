@@ -21,33 +21,70 @@
 #include "cJSON.h"
 
 #include "data.h"
+#include "gpio.h"
 #include "wifi.h"
 
 #include "mqtt.h"
 
 #define TAG "MQTT"
 
+extern int id;
 extern char room[10];
+extern DeviceData device_data;
 extern xSemaphoreHandle mqttSemaphore;
 esp_mqtt_client_handle_t client; 
 esp_mqtt_client_config_t mqtt_config = {
     .uri = "mqtt://test.mosquitto.org",
 };
+int mqtt_semaphore = 0;
+
+void sendSensorData(void *params)
+{
+    char message[50];
+    char topic[100];
+    if (xSemaphoreTake(mqttSemaphore, portMAX_DELAY))
+    {
+        mqtt_semaphore = 1;
+        while (true)
+        {
+            update_device(&device_data);
+            sprintf(topic, "fse2020/170039251/%s/temperature", room);
+            sprintf(message, "{\"id\":%d, \"temperature\":%d}", id, device_data.temperature);
+            mqtt_send_message(topic, message);
+            sprintf(topic, "fse2020/170039251/%s/humidity", room);
+            sprintf(message, "{\"id\":%d, \"humidity\":%d}", id, device_data.humidity);
+            mqtt_send_message(topic, message);
+            vTaskDelay(30000 / portTICK_PERIOD_MS);
+        }
+    }
+}
+
+void sendDeviceStatus(void)
+{
+    if (mqtt_semaphore)
+    {
+        char message[50];
+        char topic[100];
+        sprintf(topic, "fse2020/170039251/%s/status", room);
+        sprintf(message, "{\"id\":%d, \"status\":%d}", id, device_data.device_status);
+        mqtt_send_message(topic, message);
+    }
+}
 
 void mqtt_subscribe ()
 {
     char topic[50];
     char mac[18];
     setMacAddress(mac);
-    if (strlen(room))
+    if (id > 0)
         xSemaphoreGive(mqttSemaphore);
     else
     {
         char message[70];
-        sprintf(message, "{\"new_device\":%s}", mac);
-        mqtt_send_message("fse2020/170039251/dispositivos", message);
+        sprintf(message, "{\"new_device\":\"%s\"}", mac);
+        mqtt_send_message("fse2020/170039251/devices", message);
     }    
-    sprintf(topic, "fse2020/170039251/dispositivos/%s", mac);
+    sprintf(topic, "fse2020/170039251/devices/%s", mac);
     esp_mqtt_client_subscribe(client, topic, 2);
 }
 
@@ -60,7 +97,7 @@ void mqtt_receive_message (esp_mqtt_event_handle_t event)
 void mqtt_send_message (char * topic, char * message)
 {
     int id_msg = esp_mqtt_client_publish(client, topic, message, 0, 2, 0);
-    ESP_LOGI(TAG, "Mesnagem enviada, ID: %d", id_msg);
+    printf("%s:%s\n", topic, message);
 }
 
 static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)

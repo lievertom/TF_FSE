@@ -15,9 +15,5 @@ typedef struct DeviceData
 
 void parser(char * buffer);
 
-void sendSensorData(void *params);
-
-void sendDeviceStatus(void);
-
 #endif /* DATA_H_ */
 

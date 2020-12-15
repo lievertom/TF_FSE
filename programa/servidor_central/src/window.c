@@ -384,7 +384,7 @@ void add_device ()
     deleteMenuItems(room_items);
     create_button_device(item);
     subscribe(device_data[num_device-1].room);
-    sprintf(topic,"%s/%s", MQTT_BASE_TOPIC, mac_address);
+    sprintf(topic,"%s/%s", MQTT_BASE_TOPIC, device_data[num_device-1].mac);
     sprintf(msg,"{\"id\":%d, \"room\":\"%s\"}", num_device-1, device_data[num_device-1].room);
     publish(topic, msg);
     mac_address = NULL;

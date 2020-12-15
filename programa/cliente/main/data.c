@@ -21,6 +21,7 @@
 /****************************************************************************/
 /*!                        Global Statements                                */
 
+extern int id;
 extern char room[50];
 extern DeviceData device_data;
 extern xSemaphoreHandle mqttSemaphore;
@@ -35,52 +36,29 @@ extern xSemaphoreHandle mqttSemaphore;
 void parser(char * buffer)
 {
     cJSON * json = cJSON_Parse (buffer);
-
-    if (buffer[2] == 'r' && buffer[3] == 'o' && buffer[4] == 'o' && buffer[5] == 'm')
+    if(id < 0 )
     {
-        if (!strlen(room))
+        cJSON * id_json  = cJSON_GetObjectItemCaseSensitive(json, "id");
+        cJSON * room_json  = cJSON_GetObjectItemCaseSensitive(json, "room");
+        if (id_json && room_json)
         {
-            sprintf(room, "%s",cJSON_GetObjectItemCaseSensitive(json, "room")->valuestring);
-            nvs_set_room();
+            id = id_json->valueint;
+            sprintf(room, "%s", room_json->valuestring);
+            nvs_set_data();
             xSemaphoreGive(mqttSemaphore);
         }
     } 
-    else if (buffer[2] == 'd' && buffer[3] == 'e' && buffer[4] == 'v' && buffer[5] == 'i' && buffer[6] == 'c' && buffer[7] == 'e')
+    else
     {
-        int device = cJSON_GetObjectItemCaseSensitive(json, "device")->valueint;
-        if (device != device_data.device_status)
+        cJSON * status_json  = cJSON_GetObjectItemCaseSensitive(json, "status");
+        if (status_json)
         {
-            set_device_status(device);
+            int status = status_json->valueint;
+            if (status != device_data.device_status)
+            {
+                set_device_status(status);
+            }
         }
     }
     cJSON_Delete(json);
-}
-
-void sendSensorData(void *params)
-{
-    char message[50];
-    char topic[100];
-    if (xSemaphoreTake(mqttSemaphore, portMAX_DELAY))
-    {
-        while (true)
-        {
-            update_device(&device_data);
-            sprintf(message, "{\"temperature\":%d}", device_data.temperature);
-            sprintf(topic, "fse2020/170039251/dispositivos/%s/temperatura", room);
-            mqtt_send_message(topic, message);
-            sprintf(topic, "fse2020/170039251/dispositivos/%s/umidade", room);
-            sprintf(message, "{\"humidity\":%d}", device_data.humidity);
-            mqtt_send_message(topic, message);
-            vTaskDelay(30000 / portTICK_PERIOD_MS);
-        }
-    }
-}
-
-void sendDeviceStatus(void)
-{
-    char message[50];
-    char topic[100];
-    sprintf(message, "{\"status\":%d}", device_data.device_status);
-    sprintf(topic, "fse2020/170039251/dispositivos/%s/estado", room);
-    mqtt_send_message(topic, message);
 }

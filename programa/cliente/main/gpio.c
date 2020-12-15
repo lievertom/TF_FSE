@@ -10,6 +10,7 @@
 #include "freertos/queue.h"
 
 #include "dht11.h"
+#include "mqtt.h"
 
 /****************************************************************************/
 /*! @file gpio.c

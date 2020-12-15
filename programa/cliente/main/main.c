@@ -33,9 +33,10 @@
 xSemaphoreHandle wifiSemaphore = NULL;
 xSemaphoreHandle mqttSemaphore = NULL;
 
-DeviceData device_data = {0, 0, 0};
+DeviceData device_data = {0};
 
 char room[10] = "";
+int id = -1;
 
 extern esp_mqtt_client_handle_t client; 
 
@@ -49,7 +50,7 @@ extern esp_mqtt_client_handle_t client;
 void app_main(void)
 {
     nvs_init();
-    nvs_get_room();
+    nvs_get_data();
 
     wifiSemaphore = xSemaphoreCreateBinary();
     mqttSemaphore = xSemaphoreCreateBinary();
@@ -59,7 +60,7 @@ void app_main(void)
 
     esp_sleep_enable_timer_wakeup(30 * SECOND);
 
-    xTaskCreate(&sendSensorData, "Comunicação com Broker", 4096, NULL, 1, NULL);
+    xTaskCreate(&sendSensorData, "Send Sensor Data", 4096, NULL, 1, NULL);
 
     if (xSemaphoreTake(wifiSemaphore, portMAX_DELAY))
     {

@@ -4,6 +4,7 @@
 #include <signal.h>
 #include <string.h>
 #include <unistd.h>
+#include <semaphore.h>
 
 #include "control.h"
 #include "window.h"
@@ -25,7 +26,7 @@
 
 MQTTClient client;
 
-char * payload = NULL;
+char * mac_address = NULL;
 
 /****************************************************************************/
 /*!                         Functions                                       */
@@ -45,11 +46,14 @@ void publish(char* topic, char* pay_load)
 
 int on_message(void *context, char *topicName, int topicLen, MQTTClient_message *message)
 {
-    payload = message->payload;
+    char * payload = message->payload;
 
     if(!strcmp(topicName, MQTT_BASE_TOPIC))
     {
-        parser(payload);
+        if (parser(payload))
+        {
+            mac_address = payload;
+        }
     }
 
     MQTTClient_freeMessage(&message);

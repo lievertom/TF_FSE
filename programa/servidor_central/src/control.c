@@ -88,11 +88,10 @@ void initialize_system()
     initialize_window ();
     initialize_mqtt ();
     
-
     if (pthread_create(&input_thread, NULL, input_values, (void *) &system_data))
     {
         printf("Fail to create input thread\n");
-        exit(1);
+        sig_handler(SIGINT);
     }
 
     alarm(1);

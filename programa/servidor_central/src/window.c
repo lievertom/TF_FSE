@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <pthread.h>
+#include <semaphore.h>
 
 #include "data.h"
 #include "alarm.h"
@@ -28,7 +29,8 @@ WINDOW *menu_bar;
 DeviceData device_data[MAX_DEVICE] = {0};
 int num_device = 0;
 
-extern char * payload;
+sem_t output_semaphore;
+extern char * mac_address;
 
 const char *key_function[] =
 {
@@ -54,15 +56,28 @@ const char *message[] =
 
 const char *room_option[] =
 {
-    "Bedroom 1  ",
-    "Bedroom 2  ",
-    "Bedroom 3  ",
+    " Bedroom 1 ",
+    " Bedroom 2 ",
+    " Bedroom 3 ",
     "Bath room 1",
     "Bath room 2",
     "Bath room 3",
     "Living room",
-    "Kitchen    ",
-    "Yard       "
+    "  Kitchen  ",
+    "   Yard    "
+};
+
+const char *room_opt[] =
+{
+    "Bedroom1",
+    "Bedroom2",
+    "Bedroom3",
+    "Bathroom1",
+    "Bathroom2",
+    "Bathroom3",
+    "Livingroom",
+    "Kitchen",
+    "Yard"
 };
 
 /****************************************************************************/
@@ -103,11 +118,11 @@ void create_button_alarm()
 /*!
  * @brief Function used to create the device button.
  */
-void create_button_device()
+void create_button_device(int pos)
 {
     wmove(menu_bar,0,(NLAMP+num_device)*BUTTON_SIZE);
     wattron(menu_bar,COLOR_PAIR(2));
-    waddstr(menu_bar, device_data[num_device-1].room);
+    waddstr(menu_bar, room_option[pos]);
     wattron(menu_bar,COLOR_PAIR(3));
     waddstr(menu_bar, key_function[NLAMP+num_device]);
     wattroff(menu_bar,COLOR_PAIR(3));
@@ -350,6 +365,30 @@ void initialize_window ()
     bkgd(COLOR_PAIR(1));
 
     menu();
+
+    sem_init(&output_semaphore, 0, 1);
+}
+
+void add_device ()
+{
+    WINDOW **room_items;
+    char topic[100];
+    char msg[60];
+
+    alarm(0);
+    sprintf(device_data[num_device].mac, "%s", mac_address);
+    num_device++;
+    room_items = create_items();
+    int item = scrollmenu(room_items);
+    device_data[num_device-1].room = (char *)room_opt[item];
+    deleteMenuItems(room_items);
+    create_button_device(item);
+    subscribe(device_data[num_device-1].room);
+    sprintf(topic,"%s/%s", MQTT_BASE_TOPIC, mac_address);
+    sprintf(msg,"{\"room\":\"%s\"}", device_data[num_device-1].room);
+    publish(topic, msg);
+    mac_address = NULL;
+    alarm(1);
 }
 
 /*!
@@ -358,75 +397,51 @@ void initialize_window ()
 void *input_values (void *args)
 {
     SystemData *system_data = (SystemData *) args;
-    WINDOW **room_items;
     int key;
     bool auxiliary;
     char buffer[60];
-    char msg[60];
-    char topic[100];
+    
     while (1)
     {
         key = getch();
+
+        sem_wait(&output_semaphore);
+
         werase(windows.message);
         wrefresh(windows.message);
         switch (key)
         {
         case KEY_F(10):
-            if (num_device < MAX_DEVICE && payload)
+            if (num_device < MAX_DEVICE && mac_address)
             {
-                alarm(0);
-                sprintf(device_data[num_device].mac, "%s", payload);
-                num_device++;
-                room_items = create_items();
-                int item = scrollmenu(room_items);
-                device_data[num_device-1].room = (char *)room_option[item];
-                deleteMenuItems(room_items);
-                create_button_device();
+                add_device();
                 sprintf(buffer,"New device added.");
-                wprintw(windows.message, buffer);
-                touchwin(stdscr);
-                refresh();
-                store_data(buffer);
-                subscribe(device_data[num_device-1].room);
-                sprintf(topic,"%s/%s", MQTT_BASE_TOPIC, payload);
-                sprintf(msg,"{\"room\":\"%s\"}", device_data[num_device-1].room);
-                publish(topic, msg);
-                payload = NULL;
-                alarm(1);
+            }
+            else if (num_device == MAX_DEVICE)
+            {
+                sprintf(buffer,"Impossible to add more than %d device(s).", MAX_DEVICE);
+            }
+            else
+            {
+                sprintf(buffer,"Connect a new device!");
             }
             break;
         case KEY_F(2):
             switch_alarm((unsigned char)0, system_data, buffer);
-            wprintw(windows.message, buffer);
-            touchwin(stdscr);
-            refresh();
-            store_data(buffer);
             break;
         case KEY_F(3):
             auxiliary = switch_button((unsigned char)1, system_data);
             sprintf(buffer, "kitchen lamp %s", message[auxiliary ? 0 : 1]);
-            wprintw(windows.message, buffer);
-            touchwin(stdscr);
-            refresh();
-            store_data(buffer);
             break;
         case KEY_F(4):
             auxiliary = switch_button((unsigned char)2, system_data);
             sprintf(buffer, "room lamp %s", message[auxiliary ? 0 : 1]);
-            wprintw(windows.message, buffer);
-            touchwin(stdscr);
-            refresh();
-            store_data(buffer);
             break;
         case KEY_F(5):
             if (strlen(device_data[0].mac))
             {
                 auxiliary = switch_device((unsigned char)3, &device_data[0]);
                 sprintf(buffer, "%s device %s", device_data[0].room, message[auxiliary ? 0 : 1]);
-                wprintw(windows.message, buffer);
-                touchwin(stdscr);
-                refresh();
-                store_data(buffer);
                 push(); 
             }
             break;
@@ -435,10 +450,6 @@ void *input_values (void *args)
             {
                 auxiliary = switch_device((unsigned char)4, &device_data[1]);
                 sprintf(buffer, "%s device %s", device_data[1].room, message[auxiliary ? 0 : 1]);
-                wprintw(windows.message, buffer);
-                touchwin(stdscr);
-                refresh();
-                store_data(buffer);
                 push(); 
             }
             break;
@@ -447,10 +458,6 @@ void *input_values (void *args)
             {
                 auxiliary = switch_device((unsigned char)5, &device_data[2]);
                 sprintf(buffer, "%s device %s", device_data[2].room, message[auxiliary ? 0 : 1]);
-                wprintw(windows.message, buffer);
-                touchwin(stdscr);
-                refresh();
-                store_data(buffer);
                 push(); 
             }
             break;
@@ -459,10 +466,6 @@ void *input_values (void *args)
             {
                 auxiliary = switch_device((unsigned char)6, &device_data[3]);
                 sprintf(buffer, "%s device %s", device_data[3].room, message[auxiliary ? 0 : 1]);
-                wprintw(windows.message, buffer);
-                touchwin(stdscr);
-                refresh();
-                store_data(buffer);
                 push(); 
             }
             break;
@@ -471,10 +474,6 @@ void *input_values (void *args)
             {
                 auxiliary = switch_device((unsigned char)7, &device_data[4]);
                 sprintf(buffer, "%s device %s", device_data[4].room, message[auxiliary ? 0 : 1]);
-                wprintw(windows.message, buffer);
-                touchwin(stdscr);
-                refresh();
-                store_data(buffer);
                 push(); 
             }
             break;
@@ -483,6 +482,14 @@ void *input_values (void *args)
             store_data(buffer);
             return NULL;
         }
+        
+        wprintw(windows.message, buffer);
+        touchwin(stdscr);
+        refresh();
+
+        sem_post(&output_semaphore);
+
+        store_data(buffer);
     }
 }
 
@@ -491,6 +498,7 @@ void *input_values (void *args)
  */
 void *output_values (void *args)
 {
+    sem_wait(&output_semaphore);
     SystemData *system_data = (SystemData *) args;
     int line = 2;
 
@@ -523,19 +531,19 @@ void *output_values (void *args)
     
     for (size_t i = 0; i < num_device; i++)
     {
-        // if(strlen(device_data[i].mac))
-        {
-            line += 2;
-            move(line,BUTTON_SIZE*5);
-            printw(device_data[i].room);
-            move(++line,BUTTON_SIZE*5+2);
-            printw("Temperature: %d.00 oC  ", device_data[i].temperature);
-            move(++line,BUTTON_SIZE*5+2);
-            printw("Humidity: %d.00 %%  ", device_data[i].humidity);
-        }
+        line += 2;
+        move(line,BUTTON_SIZE*5);
+        printw(device_data[i].room);
+        move(++line,BUTTON_SIZE*5+2);
+        printw("Temperature: %d.00 oC  ", device_data[i].temperature);
+        move(++line,BUTTON_SIZE*5+2);
+        printw("Humidity: %d.00 %%  ", device_data[i].humidity);
     }
     
     refresh();
+
+    sem_post(&output_semaphore);
+
     return NULL;
 }
 

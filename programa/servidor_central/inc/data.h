@@ -58,7 +58,7 @@ typedef struct DeviceData
  */
 void *save_data (void *args);
 
-void parser(char * buffer);
+bool parser(char * buffer);
 
 int parser_device_data(char * buffer, int  pointer);
 

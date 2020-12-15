@@ -68,6 +68,8 @@ void *input_values (void *args);
  *  @return void
  *
  */
-void end_window(); 
+void end_window();
+
+void add_device ();
 
 #endif /* WINDOW_H_ */

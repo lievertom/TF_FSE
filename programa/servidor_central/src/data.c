@@ -40,21 +40,24 @@ const char * DEVICE_DATA[] =
 /*!
  * @brief This function parse JSON.
  */
-void parser(char * buffer)
+bool parser(char * buffer)
 {
     cJSON * json = cJSON_Parse (buffer);
     regex_t regex;
+    bool aux = false;
 
     if(!regcomp(&regex, REGEX_NEW_DEVICE, 0))
     {
         if (!regexec(&regex, buffer, 0, NULL, 0))
         {
             sprintf(buffer, "%s",cJSON_GetObjectItemCaseSensitive(json, "new_device")->valuestring);
+            aux = true;
         }
     } 
 
     regfree(&regex);
     cJSON_Delete(json);
+    return aux;
 }
 
 

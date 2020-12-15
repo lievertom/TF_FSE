@@ -412,7 +412,7 @@ void *input_values (void *args)
         wrefresh(windows.message);
         switch (key)
         {
-        case KEY_F(10):
+        case KEY_F(12):
             if (num_device < MAX_DEVICE && mac_address)
             {
                 add_device();

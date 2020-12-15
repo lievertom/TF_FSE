@@ -36,7 +36,6 @@ esp_mqtt_client_handle_t client;
 esp_mqtt_client_config_t mqtt_config = {
     .uri = "mqtt://test.mosquitto.org",
 };
-int mqtt_semaphore = 0;
 
 void sendSensorData(void *params)
 {
@@ -44,7 +43,6 @@ void sendSensorData(void *params)
     char topic[100];
     if (xSemaphoreTake(mqttSemaphore, portMAX_DELAY))
     {
-        mqtt_semaphore = 1;
         while (true)
         {
             update_device(&device_data);
@@ -61,7 +59,7 @@ void sendSensorData(void *params)
 
 void sendDeviceStatus(void)
 {
-    if (mqtt_semaphore)
+    if (id > -1)
     {
         char message[50];
         char topic[100];

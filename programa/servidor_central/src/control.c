@@ -67,14 +67,25 @@ void alarm_handler(int signum)
 void sig_handler (int signal)
 {
     alarm(0);
+
+    pthread_join(log_thread, NULL);
     pthread_join(output_thread, NULL);
-    if (system_data.alarm_pid)
-        kill(system_data.alarm_pid, SIGKILL);
+    pthread_cancel(input_thread);
+    pthread_join(sensor_thread, NULL);
+    pthread_join(sensor_alarm_thread, NULL);
+    pthread_join(alarm_thread, NULL);
+    
     end_window();
+
     turn_on_off(LAMP_1, OFF);
     turn_on_off(LAMP_2, OFF);
     bcm2835_close();
+
     printf("exit, log saved to dat/data.csv\n");
+
+    if (system_data.alarm_pid)
+        kill(system_data.alarm_pid, SIGKILL);
+    
     exit(0);
 }
 
@@ -83,6 +94,8 @@ void sig_handler (int signal)
  */
 void initialize_system()
 {
+    store_data("Initializing system...");
+    initialize_gpio();
     initialize_sensor ();
     initialize_window ();
     initialize_mqtt ();

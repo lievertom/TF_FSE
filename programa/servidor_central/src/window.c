@@ -433,12 +433,12 @@ void *input_values (void *args)
         case KEY_F(3):
             auxiliary = switch_button((unsigned char)1, system_data);
             sprintf(buffer, "kitchen lamp %s", message[auxiliary ? 0 : 1]);
-            turn_on_off(LAMP_1, !auxiliary);
+            turn_on_off(LAMP_1, auxiliary);
             break;
         case KEY_F(4):
             auxiliary = switch_button((unsigned char)2, system_data);
             sprintf(buffer, "room lamp %s", message[auxiliary ? 0 : 1]);
-            turn_on_off(LAMP_2, !auxiliary);
+            turn_on_off(LAMP_2, auxiliary);
             break;
         case KEY_F(5):
             if (strlen(device_data[0].mac))

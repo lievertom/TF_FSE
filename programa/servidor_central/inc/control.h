@@ -5,14 +5,6 @@
 /*!                         Functions                                       */
 
 /*!
- *  @brief Function to send message.
- *
- *  @return void.
- *
- */
-void push();
-
-/*!
  *  @brief Function to store log.
  *
  *  @param[in] message        :  char pointer to the message to be saved in the log

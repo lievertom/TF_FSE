@@ -23,7 +23,6 @@
 /*!                        Global Statements                                */
 
 pthread_t log_thread;
-pthread_t send_thread;
 pthread_t input_thread;
 pthread_t alarm_thread;
 pthread_t output_thread;
@@ -40,14 +39,6 @@ void store_data (char *message)
 {
     pthread_join(log_thread, NULL);
     pthread_create(&log_thread, NULL, save_data, (void *) message);
-}
-
-/*!
- * @brief Function used to send message.
- */
-void push()
-{
-    pthread_join(send_thread, NULL);
 }
 
 /*!

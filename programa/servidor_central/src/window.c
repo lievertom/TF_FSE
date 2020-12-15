@@ -442,7 +442,7 @@ void *input_values (void *args)
             {
                 auxiliary = switch_device((unsigned char)3, 0);
                 sprintf(buffer, "%s device %s", device_data[0].room, message[auxiliary ? 0 : 1]);
-                push(); 
+                push(device_data[0].mac, device_data[0].status); 
             }
             break;
         case KEY_F(6):
@@ -450,7 +450,7 @@ void *input_values (void *args)
             {
                 auxiliary = switch_device((unsigned char)4, 1);
                 sprintf(buffer, "%s device %s", device_data[1].room, message[auxiliary ? 0 : 1]);
-                push(); 
+                push(device_data[1].mac, device_data[1].status);
             }
             break;
         case KEY_F(7):
@@ -458,7 +458,7 @@ void *input_values (void *args)
             {
                 auxiliary = switch_device((unsigned char)5, 2);
                 sprintf(buffer, "%s device %s", device_data[2].room, message[auxiliary ? 0 : 1]);
-                push(); 
+                push(device_data[2].mac, device_data[2].status); 
             }
             break;
         case KEY_F(8):
@@ -466,7 +466,7 @@ void *input_values (void *args)
             {
                 auxiliary = switch_device((unsigned char)6, 3);
                 sprintf(buffer, "%s device %s", device_data[3].room, message[auxiliary ? 0 : 1]);
-                push(); 
+                push(device_data[3].mac, device_data[3].status); 
             }
             break;
         case KEY_F(9):
@@ -474,7 +474,7 @@ void *input_values (void *args)
             {
                 auxiliary = switch_device((unsigned char)7, 4);
                 sprintf(buffer, "%s device %s", device_data[4].room, message[auxiliary ? 0 : 1]);
-                push(); 
+                push(device_data[4].mac, device_data[4].status); 
             }
             break;
         case ESCAPE:
@@ -504,7 +504,7 @@ void *output_values (void *args)
 
     move(line,BUTTON_SIZE*5);
     move(++line,BUTTON_SIZE*5);
-    printw("Temperature: %.2f oC  ", system_data->temperature++);
+    printw("Temperature: %.2f oC  ", system_data->temperature);
     move(++line,BUTTON_SIZE*5);
     printw("Humidity: %.2f %%  ", system_data->humidity);
 
@@ -538,8 +538,6 @@ void *output_values (void *args)
         printw("Temperature: %d.00 oC  ", device_data[i].temperature);
         move(++line,BUTTON_SIZE*5+2);
         printw("Humidity: %d.00 %%  ", device_data[i].humidity);
-        move(++line,BUTTON_SIZE*5+2);
-        printw("status: %d ", device_data[i].status);
     }
     
     refresh();

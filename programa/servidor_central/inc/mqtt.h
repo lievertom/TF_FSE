@@ -26,4 +26,6 @@ void publish(char* topic, char* pay_load);
 
 void subscribe(char * room);
 
+void push (char * mac, int status);
+
 #endif /* MQTT_H_ */

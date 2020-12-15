@@ -34,6 +34,15 @@ char * mac_address = NULL;
 /****************************************************************************/
 /*!                         Functions                                       */
 
+void push (char * mac, int status)
+{
+    char topic[100];
+    char pay_load[60];
+    sprintf(topic, "%s/%s", MQTT_BASE_TOPIC, mac);
+    sprintf(pay_load, "{\"status\":%d}", status);
+    publish(topic, pay_load);
+}
+
 void publish(char* topic, char* pay_load) 
 {
     MQTTClient_message pubmsg = MQTTClient_message_initializer;

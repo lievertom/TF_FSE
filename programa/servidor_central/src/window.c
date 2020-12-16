@@ -224,17 +224,15 @@ void print_commands(int line)
     move(line,1);
     printw("Commands:");
     move(++line,4);
-    printw("F2: turn on or off kitchen lamp");
+    printw("F2: turn on or off Alarm");
     move(++line,4);
-    printw("F3: turn on or off room lamp");
+    printw("F3: turn on or off Kitchen lamp");
     move(++line,4);
-    printw("F4: turn on or off bedroom 1 lamp");
+    printw("F4: turn on or off Living room lamp");
+    move(++line,2);
+    printw("F5-9: turn on or off devices");
     move(++line,4);
-    printw("F5: turn on or off bedroom 2 lamp");
-    move(++line,4);
-    printw("F6: set AC temperature or press Del to turn off");
-    move(++line,4);
-    printw("F7: turn on or off alarm");
+    printw("F12: add a new device");
     move(++line,5);
     printw("^: up");
     move(++line,5);
@@ -257,6 +255,14 @@ void print_instructions(int line)
     printw("red: switched off");
     move(++line,1);
     printw("green: switched on");
+    move(++line,1);
+    printw("add new device:");
+    move(++line,3);
+    printw("1 - connect a new device");
+    move(++line,3);
+    printw("2 - wait 10 seconds");
+    move(++line,3);
+    printw("3 - press F12 and set a room");
 }
 
 /*!

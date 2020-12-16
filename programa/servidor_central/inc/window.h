@@ -21,7 +21,7 @@
 #define FIRST_LINE_MENU         0
 #define FIRST_COLUMN_MENU       0
 #define FIRST_LINE_COMMANDS     2
-#define FIRST_LINE_INSTRUCTIONS 15
+#define FIRST_LINE_INSTRUCTIONS 13
 
 #define BUTTON_SIZE             17
 

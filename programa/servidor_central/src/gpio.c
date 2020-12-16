@@ -57,7 +57,9 @@ void turn_on_off(int device, int turn)
     bcm2835_gpio_write(device, turn);
 }
 
-
+/*!
+ * @brief This function check the sensor status.
+ */
 void *sensor_control (void *args)
 {
     SystemData *system_data = (SystemData *) args;

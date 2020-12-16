@@ -34,6 +34,9 @@ char * mac_address = NULL;
 /****************************************************************************/
 /*!                         Functions                                       */
 
+/*!
+ *  @brief Function used to set device status. 
+ */
 void push (char * mac, int status)
 {
     char topic[100];
@@ -43,6 +46,9 @@ void push (char * mac, int status)
     publish(topic, pay_load);
 }
 
+/*!
+ *  @brief Function used to send message in a topic. 
+ */
 void publish(char* topic, char* pay_load) 
 {
     MQTTClient_message pubmsg = MQTTClient_message_initializer;
@@ -56,6 +62,9 @@ void publish(char* topic, char* pay_load)
     MQTTClient_waitForCompletion(client, token, 1000L);
 }
 
+/*!
+ *  @brief Function used to get the device field to update.
+ */
 void parser_topic(char * topic)
 {
     regex_t regex;
@@ -86,6 +95,9 @@ void parser_topic(char * topic)
     }
 }
 
+/*!
+ *  @brief Function used to receive messages
+ */
 int on_message(void *context, char *topic, int topicLen, MQTTClient_message *message)
 {
     char * payload = message->payload;
@@ -115,6 +127,9 @@ int on_message(void *context, char *topic, int topicLen, MQTTClient_message *mes
     return 1;
 }
 
+/*!
+ *  @brief Function used to subscribe in a topic room. 
+ */
 void subscribe(char * room)
 {
     char topic[60];
@@ -130,6 +145,9 @@ void subscribe(char * room)
 }
 
 
+/*!
+ *  @brief Function to init mqtt
+ */
 void initialize_mqtt()
 {
     int rc;

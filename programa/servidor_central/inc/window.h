@@ -72,8 +72,15 @@ void *input_values (void *args);
  */
 void end_window();
 
-void add_device ();
-
+/*!
+ *  @brief Function used to switch the devices. 
+ *
+ * @param[in] key       : button position
+ * @param[in] id        : device id
+ *
+ *  @return device status
+ *
+ */
 bool switch_device(unsigned char key, int id);
 
 #endif /* WINDOW_H_ */

@@ -44,6 +44,9 @@ bool parser(char * buffer)
     return aux;
 }
 
+/*!
+ *  @brief Function used to get the device id
+ */
 int get_id (char * buffer)
 {
     cJSON * json = cJSON_Parse (buffer);
@@ -77,6 +80,9 @@ int parser_device_data(char * buffer, char * field)
     return value;
 }
 
+/*!
+ *  @brief Function used to update device data
+ */
 void update_device_data(int id, char * field, int value)
 {
     if (!strcmp(field,"temperature"))

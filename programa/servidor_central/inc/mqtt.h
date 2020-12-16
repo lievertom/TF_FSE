@@ -20,12 +20,44 @@
 /****************************************************************************/
 /*!                         Functions                                       */
 
+/*!
+ *  @brief Function to init mqtt
+ *
+ *  @return void
+ *
+ */
 void initialize_mqtt();
 
+/*!
+ *  @brief Function used to send message in a topic. 
+ *
+ * @param[in] topic       : broken topic
+ * @param[in] pay_load    : message
+ *
+ *  @return void
+ *
+ */
 void publish(char* topic, char* pay_load);
 
+/*!
+ *  @brief Function used to subscribe in a topic room. 
+ *
+ * @param[in] room       : room name
+ *
+ *  @return void
+ *
+ */
 void subscribe(char * room);
 
+/*!
+ *  @brief Function used to set device status. 
+ *
+ * @param[in] mac       : device mac address 
+ * @param[in] status    : device status
+ *
+ *  @return device status
+ *
+ */
 void push (char * mac, int status);
 
 #endif /* MQTT_H_ */

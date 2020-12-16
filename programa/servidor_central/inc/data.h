@@ -58,12 +58,47 @@ typedef struct DeviceData
  */
 void *save_data (void *args);
 
+/*!
+ *  @brief Function used to get the device mac address
+ *
+ * @param[in] buffer       : JSON message
+ *
+ *  @return return true if get the new device mac address
+ *
+ */
 bool parser(char * buffer);
 
+/*!
+ *  @brief Function used to get the field value
+ *
+ * @param[in] buffer       : JSON message
+ * @param[in] field        : device field
+ *
+ *  @return return field value
+ *
+ */
 int parser_device_data(char * buffer, char * field);
 
+/*!
+ *  @brief Function used to get the device id
+ *
+ * @param[in] buffer       : JSON message
+ *
+ *  @return return device id
+ *
+ */
 int get_id (char * buffer);
 
+/*!
+ *  @brief Function used to update device data
+ *
+ * @param[in] id       : device id
+ * @param[in] field    : device field
+ * @param[in] value    : field value
+ *
+ *  @return void
+ *
+ */
 void update_device_data(int id, char * field, int value);
 
 #endif /* DATA_H_ */

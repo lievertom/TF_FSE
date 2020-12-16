@@ -371,6 +371,9 @@ void initialize_window ()
     sem_init(&output_semaphore, 0, 1);
 }
 
+/*!
+ * @brief Function to add a new device. 
+ */ 
 void add_device ()
 {
     WINDOW **room_items;

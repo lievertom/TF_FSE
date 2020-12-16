@@ -1,3 +1,6 @@
+/****************************************************************************/
+/*                       Header includes                                    */
+
 #include <stdio.h>
 #include <string.h>
 #include "esp_log.h"
@@ -7,9 +10,19 @@
 #include "freertos/task.h"
 #include "esp_system.h"
 
+/****************************************************************************/
+/*!                         global statement                                */
+
 extern char room[10];
 extern int id;
 
+/****************************************************************************/
+/*!                         Functions                                       */
+
+
+/**
+  * @brief Function to get data in flash memory.
+  */
 void nvs_get_data()
 {
     nvs_handle std_partision_handle;
@@ -30,6 +43,9 @@ void nvs_get_data()
     }
 }
 
+/**
+  * @brief Function to save data in flash memory.
+  */
 void nvs_set_data()
 {
     nvs_handle std_partision_handle;
@@ -43,6 +59,9 @@ void nvs_set_data()
     nvs_close(std_partision_handle);
 }
 
+/**
+  * @brief Function to init nvs.
+  */
 void nvs_init ()
 {
     esp_err_t ret = nvs_flash_init();

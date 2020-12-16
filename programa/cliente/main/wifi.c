@@ -143,6 +143,9 @@ void wifi_stop()
     vEventGroupDelete(s_wifi_event_group);
 }
 
+/**
+  * @brief Function to format mac address.
+  */
 void setMacAddress(char * mac)
 {
     uint8_t base_mac[6];

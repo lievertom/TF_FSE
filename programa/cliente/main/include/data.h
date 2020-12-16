@@ -13,6 +13,9 @@ typedef struct DeviceData
 /****************************************************************************/
 /*!                         Functions                                       */
 
+/*!
+ * @brief This function parse JSON.
+ */
 void parser(char * buffer);
 
 #endif /* DATA_H_ */

@@ -55,12 +55,19 @@ void update_device(DeviceData *device_data)
     }
 }
 
+/**
+  * @brief Function to add in interruption queue. 
+  */
 static void IRAM_ATTR gpio_isr_handler(void *args)
 {
     int pin = (int) args;
     xQueueSendFromISR(intrQueue, &pin, NULL);
 }
 
+
+/**
+  * @brief Function to process button interruption. 
+  */
 void processIntrButton(void *params)
 {
     int pin;

@@ -1,3 +1,6 @@
+/****************************************************************************/
+/*                       Header includes                                    */
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -26,7 +29,14 @@
 
 #include "mqtt.h"
 
+/****************************************************************************/
+/*!                              Macros                                     */
+
 #define TAG "MQTT"
+
+
+/****************************************************************************/
+/*!                         global statement                                */
 
 extern int id;
 extern char room[10];
@@ -37,6 +47,14 @@ esp_mqtt_client_config_t mqtt_config = {
     .uri = "mqtt://test.mosquitto.org",
 };
 
+
+/****************************************************************************/
+/*!                         Functions                                       */
+
+
+/*!
+ *  @brief Task Function used to update sersor data
+ */
 void sendSensorData(void *params)
 {
     char message[50];
@@ -57,6 +75,9 @@ void sendSensorData(void *params)
     }
 }
 
+/*!
+ *  @brief Function used to update device status
+ */
 void sendDeviceStatus(void)
 {
     if (id > -1)
@@ -69,6 +90,9 @@ void sendDeviceStatus(void)
     }
 }
 
+/*!
+ *  @brief Function used to subscribe
+ */
 void mqtt_subscribe ()
 {
     char topic[50];
@@ -86,18 +110,27 @@ void mqtt_subscribe ()
     esp_mqtt_client_subscribe(client, topic, 2);
 }
 
+/*!
+ *  @brief Function used to reveive message
+ */
 void mqtt_receive_message (esp_mqtt_event_handle_t event)
 {
     printf("%.*s\r\n", event->data_len, event->data);
     parser(event->data);
 }
 
+/*!
+ *  @brief Function used to send message
+ */
 void mqtt_send_message (char * topic, char * message)
 {
     esp_mqtt_client_publish(client, topic, message, 0, 2, 0);
     printf("%s:%s\n", topic, message);
 }
 
+/*!
+ *  @brief Function used to process mqtt event
+ */
 static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
 {
     client = event->client;
@@ -133,11 +166,18 @@ static esp_err_t mqtt_event_handler_cb(esp_mqtt_event_handle_t event)
     return ESP_OK;
 }
 
+/*!
+ *  @brief Function used to mqtt event handler
+ */
 static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data) {
     ESP_LOGD(TAG, "Event dispatched from event loop base=%s, event_id=%d", base, event_id);
     mqtt_event_handler_cb(event_data);
 }
 
+
+/**
+  * @brief Function to init mqtt.
+  */
 void mqtt_start()
 {
     client = esp_mqtt_client_init(&mqtt_config);

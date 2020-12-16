@@ -19,6 +19,12 @@ void wifi_start();
   */
 void wifi_stop();
 
+/**
+  * @brief Function to format mac address.
+ * 
+ * @param[in] mac       : device mac address
+ * 
+  */
 void setMacAddress(char * mac);
 
 #endif /* WIFI_H_ */

@@ -73,12 +73,12 @@ void mqtt_subscribe ()
 {
     char topic[50];
     char mac[18];
+    char message[70];
     setMacAddress(mac);
-    if (id > 0)
+    if (id > -1)
         xSemaphoreGive(mqttSemaphore);
     else
     {
-        char message[70];
         sprintf(message, "{\"new_device\":\"%s\"}", mac);
         mqtt_send_message("fse2020/170039251/devices", message);
     }    
@@ -94,7 +94,7 @@ void mqtt_receive_message (esp_mqtt_event_handle_t event)
 
 void mqtt_send_message (char * topic, char * message)
 {
-    int id_msg = esp_mqtt_client_publish(client, topic, message, 0, 2, 0);
+    esp_mqtt_client_publish(client, topic, message, 0, 2, 0);
     printf("%s:%s\n", topic, message);
 }
 

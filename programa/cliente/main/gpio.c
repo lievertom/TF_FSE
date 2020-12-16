@@ -41,10 +41,17 @@ void set_device_status(int status)
   */
 void update_device(DeviceData *device_data)
 {
+    int temperature_temp, humidity_temp;
     if (!DHT11_read().status)
     {
-        device_data->temperature = DHT11_read().temperature;
-        device_data->humidity = DHT11_read().humidity;
+        temperature_temp = DHT11_read().temperature;
+        humidity_temp = DHT11_read().humidity;
+
+        if(temperature_temp > 0 && temperature_temp < 50)
+            device_data->temperature = temperature_temp;
+        
+        if(humidity_temp > 20 && humidity_temp < 90)
+            device_data->humidity = humidity_temp;
     }
 }
 
